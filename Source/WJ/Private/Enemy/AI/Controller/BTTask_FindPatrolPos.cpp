@@ -27,7 +27,7 @@ EBTNodeResult::Type UBTTask_FindPatrolPos::ExecuteTask(UBehaviorTreeComponent& O
 	auto origin_vector = OwnerComp.GetBlackboardComponent()->GetValueAsVector(ABase_AIController::spawn_position);
 	FNavLocation next_patrol;
 
-	if (navigation_system->GetRandomPointInNavigableRadius(FVector::ZeroVector, 500.0f, next_patrol) == true)
+	if (navigation_system->GetRandomPointInNavigableRadius(FVector::ZeroVector, 1500.0f, next_patrol) == true)
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(ABase_AIController::patrol_position, next_patrol.Location);
 		return EBTNodeResult::Type::Succeeded;
