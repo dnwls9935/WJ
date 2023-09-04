@@ -49,7 +49,8 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 			DrawDebugPoint(world, control_pawn->GetActorLocation(), 10.0f, FColor::Blue, false, 0.2f);
 			DrawDebugLine(world, control_pawn->GetActorLocation(), actor->GetActorLocation(), FColor::Blue, false, 0.2f);
 
-			OwnerComp.GetAIOwner()->MoveToActor(actor, 2.f);
+			//OwnerComp.GetAIOwner()->MoveToActor(actor, 2.f);
+			//OwnerComp.GetAIOwner()->GetPawn()->bUseControllerRotationYaw = true;
 
 			return;
 		}
@@ -58,7 +59,8 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	auto target = OwnerComp.GetBlackboardComponent()->GetValueAsObject(ABase_AIController::target_key);
 	if (target != nullptr)
 	{
-		OwnerComp.GetAIOwner()->MoveToActor(Cast<AActor>(target), 2.f);
+		//OwnerComp.GetAIOwner()->MoveToActor(Cast<AActor>(target), 2.f);
+		//OwnerComp.GetAIOwner()->GetPawn()->bUseControllerRotationYaw = true;
 	}
 
 	DrawDebugSphere(world, control_pawn->GetActorLocation(), 600.0f, 16, FColor::Red, false, 0.2f);

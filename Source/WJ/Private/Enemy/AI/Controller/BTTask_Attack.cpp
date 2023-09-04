@@ -29,8 +29,8 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 			is_attaking = false;
 		});
 
-	auto target =  OwnerComp.GetBlackboardComponent()->GetValueAsObject(ABase_AIController::target_key);
-	OwnerComp.GetAIOwner()->MoveToActor(Cast<ABaseCharacter>(target), 3);
+	//auto target =  OwnerComp.GetBlackboardComponent()->GetValueAsObject(ABase_AIController::target_key);
+	//OwnerComp.GetAIOwner()->MoveTo(Cast<ABaseCharacter>(target), 3);
 
 	return EBTNodeResult::Type::InProgress;
 }
@@ -41,8 +41,8 @@ void UBTTask_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemo
 
 	if (is_attaking == false)
 	{
-		is_attaking = true;
-		Cast<ABaseCharacter>(OwnerComp.GetAIOwner()->GetPawn())->Attack();
-		//FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		is_attaking = false;
+		//Cast<ABaseCharacter>(OwnerComp.GetAIOwner()->GetPawn())->Attack();
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }

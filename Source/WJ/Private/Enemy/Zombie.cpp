@@ -16,7 +16,7 @@ void AZombie::BeginPlay()
 	Super::BeginPlay();
 
 	//bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	//GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void AZombie::PossessedBy(AController* _new_controller)

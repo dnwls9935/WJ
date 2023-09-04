@@ -20,12 +20,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void Attack() noexcept;
+	virtual void Attack() noexcept;
 
 	UFUNCTION()
 	virtual void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	void PostInitializeComponents() override;
+
+	FORCEINLINE const bool GetLegsBreak() const noexcept { return right_leg_destroy == true && left_leg_destroy == true; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -45,5 +47,23 @@ protected:
 
 	UPROPERTY()
 	class UBaseAnimInstance* animinstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess="true"))
+	float attack_range;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess = "true"))
+	float attack_radius;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "left Leg", Meta = (AllowPrivateAccess = "true"))
+	float left_leg_health;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "left Leg", Meta = (AllowPrivateAccess = "true"))
+	bool left_leg_destroy;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Right Leg", Meta = (AllowPrivateAccess = "true"))
+	float right_leg_health;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Right Leg", Meta = (AllowPrivateAccess = "true"))
+	bool right_leg_destroy;
 
 };
