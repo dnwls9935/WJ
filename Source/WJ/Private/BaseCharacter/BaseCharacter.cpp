@@ -4,6 +4,7 @@
 #include "BaseCharacter/BaseCharacter.h"
 #include "Animation/AnimInstance.h"
 #include "BaseCharacter/BaseAnimInstance.h"
+#include "Enemy/AI/Controller/Base_AIController.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -17,6 +18,8 @@ ABaseCharacter::ABaseCharacter()
 	, left_leg_destroy(false)
 	, right_leg_health(15.0f)
 	, right_leg_destroy(false)
+	, target(nullptr)
+	, is_dead(false)
 
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -42,7 +45,6 @@ void ABaseCharacter::Tick(float DeltaTime)
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void ABaseCharacter::Attack() noexcept

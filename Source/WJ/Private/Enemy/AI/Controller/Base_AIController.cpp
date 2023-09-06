@@ -2,9 +2,11 @@
 
 
 #include "Enemy/AI/Controller/Base_AIController.h"
+#include "BaseCharacter/BaseCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 
 const FName ABase_AIController::spawn_position(TEXT("spawn_position"));
 const FName ABase_AIController::patrol_position(TEXT("patrol_position"));
@@ -28,6 +30,8 @@ ABase_AIController::ABase_AIController()
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("behavior success"));
 	}
 
+	b = false;
+
 }
 
 void ABase_AIController::OnPossess(APawn* _pawn)
@@ -41,9 +45,21 @@ void ABase_AIController::OnPossess(APawn* _pawn)
 		if (RunBehaviorTree(behavior_tree) == false)
 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("RunBehaviorTree is false"));
 	}
+
 }
 
 void ABase_AIController::OnUnPossess()
 {
 	Super::OnUnPossess();
+}
+
+void ABase_AIController::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+void ABase_AIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }

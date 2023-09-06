@@ -28,9 +28,14 @@ public:
 	void PostInitializeComponents() override;
 
 	FORCEINLINE const bool GetLegsBreak() const noexcept { return right_leg_destroy == true && left_leg_destroy == true; }
+	FORCEINLINE class AActor* GetTarget() const noexcept { return target; }
+	FORCEINLINE const bool GetDead() const noexcept { return is_dead; }
 
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	//void ChasingTarget() noexcept;
 
 public:
 	FOnAttackEnd_Delegate on_attack_end;
@@ -42,11 +47,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
 	float current_health;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	bool	is_attack;
-
 	UPROPERTY()
 	class UBaseAnimInstance* animinstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
+	bool	is_attack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess="true"))
 	float attack_range;
@@ -65,5 +70,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Right Leg", Meta = (AllowPrivateAccess = "true"))
 	bool right_leg_destroy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Target", Meta = (AllowPrivateAccess = "true"))
+	class AActor* target;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Dead", Meta = (AllowPrivateAccess = "true"))
+	bool is_dead;
+
 
 };

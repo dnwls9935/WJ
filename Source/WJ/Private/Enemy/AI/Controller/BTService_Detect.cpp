@@ -5,6 +5,8 @@
 #include "Enemy/AI/Controller/Base_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "BaseCharacter/BaseCharacter.h"
 
 
 UBTService_Detect::UBTService_Detect()
@@ -21,6 +23,13 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	if (control_pawn == nullptr)
 		return;
 
+	auto cast_pawn = Cast<ABaseCharacter>(control_pawn);
+	if (cast_pawn->GetDead() == true)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Is Dead!!!!"));
+		return;
+	}
+
 	auto world = control_pawn->GetWorld();
 	if (world == nullptr)
 		return;
@@ -32,7 +41,7 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 											, control_pawn->GetActorLocation()
 											, FQuat::Identity
 											, ECollisionChannel::ECC_Pawn
-											, FCollisionShape::MakeSphere(600.0f)
+											, FCollisionShape::MakeSphere(3000.0f)
 											, collision_query_params);
 
 	if (result == true && overlap_results.IsEmpty() == false)
@@ -44,13 +53,14 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 				continue;
 
 			OwnerComp.GetBlackboardComponent()->SetValueAsObject(ABase_AIController::target_key, actor);
-			DrawDebugSphere(world, actor->GetActorLocation(), 600.0f, 10.0f, FColor::Blue, false, 0.2f);
+			DrawDebugSphere(world, actor->GetActorLocation(), 3000.0f, 10.0f, FColor::Blue, false, 0.2f);
 
 			DrawDebugPoint(world, control_pawn->GetActorLocation(), 10.0f, FColor::Blue, false, 0.2f);
 			DrawDebugLine(world, control_pawn->GetActorLocation(), actor->GetActorLocation(), FColor::Blue, false, 0.2f);
 
+			UAIBlueprintHelperLibrary::SimpleMoveToActor(OwnerComp.GetAIOwner(), actor);
+
 			//OwnerComp.GetAIOwner()->MoveToActor(actor, 2.f);
-			//OwnerComp.GetAIOwner()->GetPawn()->bUseControllerRotationYaw = true;
 
 			return;
 		}
@@ -63,5 +73,5 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 		//OwnerComp.GetAIOwner()->GetPawn()->bUseControllerRotationYaw = true;
 	}
 
-	DrawDebugSphere(world, control_pawn->GetActorLocation(), 600.0f, 16, FColor::Red, false, 0.2f);
+	DrawDebugSphere(world, control_pawn->GetActorLocation(), 3000.0f, 16, FColor::Red, false, 0.2f);
 }

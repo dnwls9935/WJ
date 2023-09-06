@@ -20,6 +20,8 @@ public:
 public:
 	virtual void OnPossess(class APawn* _pawn) override;
 	virtual void OnUnPossess() override;
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 public:
 	static const FName spawn_position;
@@ -32,4 +34,6 @@ private:
 
 	UPROPERTY()
 	class UBlackboardData*		black_board;
+
+	bool b;
 };
