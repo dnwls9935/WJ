@@ -5,7 +5,7 @@
 #include "BaseCharacter/BaseCharacter.h"
 #include "Enemy/AI/Controller/Base_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "BaseCharacter/BaseCharacter.h"
+#include "Enemy/Enemy.h"
 
 UBTTask_Attack::UBTTask_Attack()
 	: is_attaking(false)
@@ -17,17 +17,17 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 {
 	EBTNodeResult::Type result = Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	auto character = Cast<ABaseCharacter>(OwnerComp.GetAIOwner()->GetPawn());
+	auto character = Cast<AEnemy>(OwnerComp.GetAIOwner()->GetPawn());
 	if (character == nullptr)
 		return EBTNodeResult::Failed;
 
 	character->Attack();
-	is_attaking = true;
+	is_attaking = false;
 
 	character->on_attack_end.AddLambda([this]() -> void
-		{
-			is_attaking = false;
-		});
+				{
+					//is_attaking = false;
+				});
 
 	//auto target =  OwnerComp.GetBlackboardComponent()->GetValueAsObject(ABase_AIController::target_key);
 	//OwnerComp.GetAIOwner()->MoveTo(Cast<ABaseCharacter>(target), 3);
@@ -39,10 +39,11 @@ void UBTTask_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemo
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSecond);
 
-	if (is_attaking == false)
+
+	auto castPawn = Cast<AEnemy>(OwnerComp.GetAIOwner()->GetPawn());
+	if (castPawn != nullptr && castPawn->CanAttack() == false)
 	{
-		is_attaking = false;
-		//Cast<ABaseCharacter>(OwnerComp.GetAIOwner()->GetPawn())->Attack();
+		castPawn->Attack();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }

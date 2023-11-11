@@ -17,9 +17,6 @@ class WJ_API UBaseAnimInstance : public UAnimInstance
 public:
 	UBaseAnimInstance();
 
-	void PlayAttackMontage() noexcept;
-
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess = true))
-	class UAnimMontage* attack_montage;
+public:
+	virtual void PlayAttackMontage() noexcept;
 };

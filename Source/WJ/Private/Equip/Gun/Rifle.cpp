@@ -1,0 +1,14 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Equip/Gun/Rifle.h"
+
+ARifle::ARifle()
+{
+	info.base_damage = 15.0f;
+	info.status = WEAPON_STATUS::RIFLE;
+}
+
+void ARifle::BeginPlay()
+{
+}

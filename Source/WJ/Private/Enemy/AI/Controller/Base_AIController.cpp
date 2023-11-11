@@ -46,6 +46,7 @@ void ABase_AIController::OnPossess(APawn* _pawn)
 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("RunBehaviorTree is false"));
 	}
 
+
 }
 
 void ABase_AIController::OnUnPossess()
@@ -56,7 +57,7 @@ void ABase_AIController::OnUnPossess()
 void ABase_AIController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void ABase_AIController::Tick(float DeltaTime)

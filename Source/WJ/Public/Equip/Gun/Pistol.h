@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Gun.h"
 #include "Pistol.generated.h"
 
 UCLASS()
-class WJ_API APistol : public AActor
+class WJ_API APistol : public AGun
 {
 	GENERATED_BODY()
 	
@@ -23,9 +24,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite ,Category = "Damage", meta = (AllowPrivateAccess = "true"))
-	float base_damage;
 
 };

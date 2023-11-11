@@ -4,6 +4,7 @@
 #include "Enemy/AI/Controller/BTDecorator_IsInAttackRange.h"
 #include "Enemy/AI/Controller/Base_AIController.h"
 #include "BaseCharacter/BaseCharacter.h"
+#include "Enemy/Enemy.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTDecorator_IsInAttackRange::UBTDecorator_IsInAttackRange()
@@ -19,11 +20,13 @@ bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeCompo
 	if (controlling_pawn == nullptr)
 		return false;
 
-	const auto target = Cast<ABaseCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ABase_AIController::target_key));
+
+	const auto target = Cast<ACharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(ABase_AIController::target_key));
+	
 	if (target == nullptr)
 		return false;
 
-
 	result = (target->GetDistanceTo(controlling_pawn) <= 200.0f);
+
 	return result;
 }

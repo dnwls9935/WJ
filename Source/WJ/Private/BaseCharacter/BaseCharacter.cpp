@@ -5,21 +5,17 @@
 #include "Animation/AnimInstance.h"
 #include "BaseCharacter/BaseAnimInstance.h"
 #include "Enemy/AI/Controller/Base_AIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
 	: max_health(-1)
 	, current_health(-1)
-	, is_attack(false)
 	, animinstance(nullptr)
-	, attack_range(100.0f)
-	, attack_radius(50.0f)
-	, left_leg_health(15.0f)
-	, left_leg_destroy(false)
-	, right_leg_health(15.0f)
-	, right_leg_destroy(false)
-	, target(nullptr)
 	, is_dead(false)
+	, movement_speed(0)
+	, actor_type(ACTOR_TYPE::NONE)
 
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -30,8 +26,46 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	current_health = max_health;
+	movement_speed = GetCharacterMovement()->MaxWalkSpeed;
+}
+
+void ABaseCharacter::Die() noexcept
+{
+	if (is_dead == true)
+		return;
+
+	is_dead = true;
+
+	current_health = 0;
+
+	Ragdoll();
+}
+
+void ABaseCharacter::Hit(const float _damage_amount) noexcept
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("%s"), *this->GetName()));
+
+	current_health = _damage_amount;
+}
+
+void ABaseCharacter::Ragdoll() noexcept
+{
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
+
+	auto impulse_direction = GetActorRotation().Vector() * -1.0f;
+	impulse_direction.Normalize();
+
+	auto impulse_strength = 1500.0f;
+
+	auto final_impulse = impulse_direction * impulse_strength;
+	GetMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	GetMesh()->AddImpulseToAllBodiesBelow(final_impulse, NAME_None);
+
+	if (GetCapsuleComponent() != nullptr)
+		GetCapsuleComponent()->DestroyComponent();
+
 }
 
 // Called every frame
@@ -49,50 +83,11 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ABaseCharacter::Attack() noexcept
 {
-	is_attack = true;
-	animinstance->PlayAttackMontage();
-
-	FHitResult hit_result;
-	FCollisionQueryParams params(NAME_None, false, this);
-	const auto result = GetWorld()->SweepSingleByChannel(hit_result
-														, GetActorLocation()
-														, GetActorLocation() + GetActorForwardVector() * attack_range
-														, FQuat::Identity
-														, ECollisionChannel::ECC_Pawn
-														, FCollisionShape::MakeSphere(attack_radius)
-														, params);
-
-	auto trace_vector = GetActorForwardVector() * attack_range;
-	auto center = GetActorLocation() + trace_vector * 0.5f;
-	auto half_height = attack_range * 0.5f + attack_radius;
-	auto capsule_rot = FRotationMatrix::MakeFromZ(trace_vector).ToQuat();
-	auto draw_color = result ? FColor::Green : FColor::Red;
-	auto debug_life_time = 5.0f;
-
-	DrawDebugCapsule(GetWorld()
-					, center
-					, half_height
-					, attack_radius
-					, capsule_rot
-					, draw_color
-					, false
-					, debug_life_time);
-
-	if (result == true)
-	{
-		if (::IsValid(hit_result.GetActor()) == true)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, TEXT("Attack true"));
-		}
-	}
-
-
+	
 }
 
 void ABaseCharacter::OnAttackMontageEnded(UAnimMontage* _montage, bool _interrupted)
 {
-	on_attack_end.Broadcast();
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("BaseCharacter OnAttackMontageEnded"));
 }
 
 void ABaseCharacter::PostInitializeComponents()
@@ -104,4 +99,3 @@ void ABaseCharacter::PostInitializeComponents()
 	if (animinstance != nullptr)
 		animinstance->OnMontageEnded.AddDynamic(this, &ABaseCharacter::OnAttackMontageEnded);
 }
-

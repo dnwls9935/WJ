@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../Function/WJDefines.h"
 #include "BaseCharacter.generated.h"
-
-DECLARE_MULTICAST_DELEGATE(FOnAttackEnd_Delegate);
 
 UCLASS()
 class WJ_API ABaseCharacter : public ACharacter
@@ -24,21 +23,20 @@ public:
 
 	UFUNCTION()
 	virtual void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	virtual void PostInitializeComponents() override;
 
-	void PostInitializeComponents() override;
-
-	FORCEINLINE const bool GetLegsBreak() const noexcept { return right_leg_destroy == true && left_leg_destroy == true; }
-	FORCEINLINE class AActor* GetTarget() const noexcept { return target; }
 	FORCEINLINE const bool GetDead() const noexcept { return is_dead; }
+
+	FORCEINLINE const ACTOR_TYPE GetActorType() const noexcept { return actor_type; }
+
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Die() noexcept;
+	virtual void Hit(const float _damage_amount) noexcept;
 
 private:
-	//void ChasingTarget() noexcept;
-
-public:
-	FOnAttackEnd_Delegate on_attack_end;
+	void Ragdoll() noexcept;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Status", meta=(AllowPrivateAccess="true"))
@@ -47,35 +45,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
 	float current_health;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
+	ACTOR_TYPE actor_type;
+
 	UPROPERTY()
 	class UBaseAnimInstance* animinstance;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	bool	is_attack;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess="true"))
-	float attack_range;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess = "true"))
-	float attack_radius;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "left Leg", Meta = (AllowPrivateAccess = "true"))
-	float left_leg_health;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "left Leg", Meta = (AllowPrivateAccess = "true"))
-	bool left_leg_destroy;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Right Leg", Meta = (AllowPrivateAccess = "true"))
-	float right_leg_health;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Right Leg", Meta = (AllowPrivateAccess = "true"))
-	bool right_leg_destroy;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Target", Meta = (AllowPrivateAccess = "true"))
-	class AActor* target;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Dead", Meta = (AllowPrivateAccess = "true"))
 	bool is_dead;
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement", Meta = (AllowPrivateAccess = "true"))
+	float movement_speed;
 };
