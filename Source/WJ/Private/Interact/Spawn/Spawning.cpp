@@ -17,6 +17,8 @@ ASpawning::ASpawning()
 const bool ASpawning::Interact(AActor* _intereacting_actor) noexcept
 {
 	auto result = Super::Interact(_intereacting_actor);
+    if (result == false)
+        return false;
 
     GetWorldTimerManager().SetTimer(spawn_timer, this, &ASpawning::Spawning, spawn_time, true);
     return result;

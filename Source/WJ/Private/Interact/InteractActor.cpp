@@ -2,6 +2,7 @@
 
 
 #include "Interact/InteractActor.h"
+#include "Player/PlayerCharacter.h"
 
 // Sets default values
 AInteractActor::AInteractActor()
@@ -13,6 +14,9 @@ AInteractActor::AInteractActor()
 
 const bool AInteractActor::Interact(AActor* _interacting_actor) noexcept
 {
+	if (Cast<APlayerCharacter>(_interacting_actor) == nullptr)
+		return false;
+
 	is_interact = true;
 	SetInteractingActor(_interacting_actor);
 

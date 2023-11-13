@@ -54,6 +54,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndReload() noexcept;
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable)
+	WEAPON_STATUS GetWeaponType() { return info.status; }
+
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int GetCurrentAmmo() {return current_ammo;}
 
@@ -66,10 +72,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int GetMaxMagazine() { return max_magazine; }
 
-	FORCEINLINE bool CanReload() noexcept { return (GetReload() == false) && (current_ammo < max_ammo); }
+	FORCEINLINE bool CanReload() noexcept { return (GetReload() == false) && (current_ammo < max_ammo) && current_magazine > 0; }
 
 	FORCEINLINE class APlayerCharacter* GetOwnerPlayer() const noexcept { return owner_player_actor; }
 	FORCEINLINE void SetOwnerPlayer(class APlayerCharacter* _player) noexcept { owner_player_actor = _player; }
+
+
+	void UpdateWeaponInfoToHUD();
+
+	void SetFlash() noexcept;
 
 protected:
 	// Called when the game starts or when spawned
@@ -78,12 +89,6 @@ protected:
 	void CanFire() noexcept;
 	void TurnOffMuzzleEffect() noexcept;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION(BlueprintCallable)
-	WEAPON_STATUS GetWeaponType() { return info.status; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attach Status", meta = (AllowPrivateAccess="true"))
@@ -100,6 +105,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Info", meta = (AllowPrivateAccess = "true"))
 	class UPointLightComponent* fire_light;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Info", meta = (AllowPrivateAccess = "true"))
+	class USpotLightComponent* flash;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Info", meta = (AllowPrivateAccess = "true"))
 	bool				can_fire;
@@ -130,6 +138,7 @@ protected:
 	FTimerHandle		fire_light_timer;
 
 	bool				is_reloading;
-
 	
+
+	class AWJGameMode* cast_game_mode;
 };

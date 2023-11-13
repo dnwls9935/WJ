@@ -17,8 +17,10 @@ APistol::APistol()
 // Called when the game starts or when spawned
 void APistol::BeginPlay()
 {
+	max_ammo = 12;
 	Super::BeginPlay();
 	
+	current_magazine = 24;
 }
 
 // Called every frame

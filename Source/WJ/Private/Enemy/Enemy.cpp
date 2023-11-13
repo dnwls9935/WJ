@@ -27,6 +27,8 @@ AEnemy::AEnemy()
 	, is_intro(false)
 {
 	actor_type = ACTOR_TYPE::ENEMY;
+	Tags.Add(FName("Enemy"));
+
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -128,7 +130,6 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-
 	BeginPlay(enemy_spawn_type);
 }
 
@@ -200,6 +201,17 @@ void AEnemy::BeginIntroMontage() noexcept
 	GetMesh()->GetAnimInstance()->Montage_Play(intro_montage);
 	GetMesh()->GetAnimInstance()->Montage_JumpToSection(FName(*FString::Printf(TEXT("stand_up_%d"), intro_montage_index)), intro_montage);
 }
+
+void AEnemy::WakeUpEvent(float _time, class AActor* _target) noexcept
+{
+	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(intro_montage) == true)
+		return;
+
+	FTimerHandle timer;
+	SetTarget(_target);
+	GetWorldTimerManager().SetTimer(timer, this, &AEnemy::BeginIntroMontage, _time);
+}
+
 
 void AEnemy::BeginPlay(ENEMY_SPAWN_TYPE _type) noexcept
 {

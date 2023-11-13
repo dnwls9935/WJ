@@ -4,7 +4,9 @@
 #include "Equip/Gun/Gun.h"
 #include "Components/PointLightComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameMode/WJGameMode.h"
 
 // Sets default values
 AGun::AGun()
@@ -16,6 +18,7 @@ AGun::AGun()
 	, max_ammo(0)
 	, current_ammo(0)
 	, owner_player_actor(nullptr)
+	, current_magazine(0)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -34,6 +37,10 @@ AGun::AGun()
 
 	muzzle_effect = CreateDefaultSubobject<UParticleSystem>(TEXT("Muzzle Effect"));
 
+	flash = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flash"));
+	flash->SetupAttachment(muzzle_point);
+	flash->SetVisibility(false);
+
 }
 
 void AGun::SetAttach(const bool _b) noexcept
@@ -42,10 +49,12 @@ void AGun::SetAttach(const bool _b) noexcept
 	if (is_attached == true)
 	{
 		SetActorHiddenInGame(true);
+		UpdateWeaponInfoToHUD();
 	}
 	else
 	{
 		SetActorHiddenInGame(false);
+		UpdateWeaponInfoToHUD();
 	}
 }
 
@@ -62,8 +71,21 @@ bool AGun::Fire() noexcept
 	GetWorldTimerManager().SetTimer(fire_timer, this, &AGun::CanFire, fire_rate);
 	
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), muzzle_effect, muzzle_point->GetComponentTransform());
+	
+	UpdateWeaponInfoToHUD();
 
 	return true;
+}
+
+void AGun::UpdateWeaponInfoToHUD()
+{
+	cast_game_mode->UpdateCurrentWidgetInfo(this);
+}
+
+void AGun::SetFlash() noexcept
+{
+	const bool b = flash->GetVisibleFlag();
+	flash->SetVisibility(!b);
 }
 
 void AGun::BeginReload() noexcept
@@ -75,16 +97,20 @@ void AGun::EndReload() noexcept
 {
 	is_reloading = false;
 
-
-	current_ammo = max_ammo;
-	/*int current = current_magazine - current_ammo;
-	if (current < 0)
+	int minus = current_magazine - (max_ammo - current_ammo);
+	if (minus > 0)
 	{
-		current_ammo = current_ammo + current;
+		current_ammo = max_ammo;
+		current_magazine = minus;
 	}
 	else
 	{
-	}*/
+		current_ammo += current_magazine;
+		current_magazine = 0;
+	}
+
+
+	UpdateWeaponInfoToHUD();
 }
 
 void AGun::CanFire() noexcept
@@ -103,6 +129,12 @@ void AGun::BeginPlay()
 	Super::BeginPlay();
 	
 	current_ammo = max_ammo;
+
+	auto game_mode = UGameplayStatics::GetGameMode(GetWorld());
+	if (game_mode != nullptr)
+		cast_game_mode = Cast<AWJGameMode>(game_mode);
+
+	UpdateWeaponInfoToHUD();
 }
 
 // Called every frame

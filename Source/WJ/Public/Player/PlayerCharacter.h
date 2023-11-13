@@ -42,6 +42,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CameraShaking() noexcept;
 
+	UFUNCTION(BlueprintCallable)
+	void EquipStateIsNone() noexcept;
+
+	UFUNCTION(BlueprintCallable)
+	void Move(float _speed) noexcept;
+
+
+	void Tick(float _delta_time) override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -49,9 +57,9 @@ protected:
 	void Attack() noexcept override;
 
 private:
-	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Equip(const FInputActionValue& Value);
+	void Flash(const FInputActionValue& Value);
 	void PlayAttackMontage();
 
 	void Die() noexcept override;
@@ -101,6 +109,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
 	class UInputAction* reload_action;
 
+	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
+	class UInputAction* flash_action;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Montage", Meta = (AllowPrivateAccess = true))
 	class UAnimMontage* attack_montage;
 
@@ -127,4 +138,22 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool				is_zoomm;
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status", Meta = (AllowPrivateAccess = "true"))
+	float current_movement_delta;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status", Meta = (AllowPrivateAccess = "true"))
+	float cross_hair_spread_multiplier;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status", Meta = (AllowPrivateAccess = "true"))
+	float corss_hair_velocity_factor;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class AActor* camera_actor;
+
+
+
+	class AWJGameMode* cast_game_mode;
 };

@@ -43,9 +43,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndIntro() noexcept {SetIsIntro(false); }
 
-
 	void BeginPlay(ENEMY_SPAWN_TYPE _type) noexcept;
+	void BeginIntroMontage() noexcept;
 
+	void WakeUpEvent(float _time, class AActor* _target) noexcept;
 
 protected:
 	virtual void BeginPlay() override;
@@ -56,8 +57,6 @@ protected:
 private:
 	const float ShootTarget(const float _damage, const FString _name) noexcept;
 	void Destroy();
-
-	void BeginIntroMontage() noexcept;
 
 public:
 	FOnAttackEnd_Delegate on_attack_end;

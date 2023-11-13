@@ -11,4 +11,8 @@ ARifle::ARifle()
 
 void ARifle::BeginPlay()
 {
+	max_ammo = 30;
+	Super::BeginPlay();
+
+	current_magazine = 60;
 }

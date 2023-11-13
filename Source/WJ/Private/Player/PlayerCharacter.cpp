@@ -15,6 +15,7 @@
 #include "Equip/Gun/Gun.h"
 #include "Player/SlotComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameMode/WJGameMode.h"
 
 APlayerCharacter::APlayerCharacter()
 	: spring_arm(nullptr)
@@ -31,6 +32,9 @@ APlayerCharacter::APlayerCharacter()
 	, inventory_action(nullptr)
 	, equip_weapon(nullptr)
 	, is_zoomm(false)
+	, current_movement_delta(0)
+	, cross_hair_spread_multiplier(0)
+	, corss_hair_velocity_factor(0)
 {
 	slots_component = CreateDefaultSubobject<USlotComponent>(TEXT("Slots"));
 	actor_type = ACTOR_TYPE::PLAYER;
@@ -49,6 +53,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(select_slot_action, ETriggerEvent::Started, this, &APlayerCharacter::SelectSlotInputEvnet);
 		EnhancedInputComponent->BindAction(inventory_action, ETriggerEvent::Started, this, &APlayerCharacter::InventoryInputEvent);
 		EnhancedInputComponent->BindAction(reload_action, ETriggerEvent::Started, this, &APlayerCharacter::Reload);
+		EnhancedInputComponent->BindAction(flash_action, ETriggerEvent::Started, this, &APlayerCharacter::Flash);
 	}
 }
 
@@ -62,6 +67,7 @@ void APlayerCharacter::SetEquipWeqpon(AGun* _weapon) noexcept
 	_weapon->SetActorHiddenInGame(false);
 	_weapon->SetOwnerPlayer(this);
 	equip_weapon = _weapon;
+	equip_weapon->UpdateWeaponInfoToHUD();
 }
 
 void APlayerCharacter::ClearEquipWeapon() noexcept
@@ -78,6 +84,40 @@ void APlayerCharacter::CameraShaking() noexcept
 	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->StartCameraShake(shake_classes, 1.0f);
 }
 
+void APlayerCharacter::EquipStateIsNone() noexcept
+{
+	auto game_mode = UGameplayStatics::GetGameMode(GetWorld());
+	if (game_mode != nullptr)
+		cast_game_mode->UpdateCurrentWidgetInfo(nullptr);
+}
+
+void APlayerCharacter::Tick(float _delta_time)
+{
+	Super::Tick(_delta_time);
+
+	cast_game_mode->GetCurrentHUD()->UpdateAimFocus(false);
+
+	if (is_zoomm == true && camera_actor != nullptr)
+	{
+		FHitResult hit_result;
+
+		auto start = camera_actor->GetActorLocation();
+		auto end = start + (camera_actor->GetActorForwardVector() * 3000.0f);
+
+		if (GetWorld()->LineTraceSingleByChannel(hit_result, start, end, ECollisionChannel::ECC_Pawn))
+		{
+			if (hit_result.GetActor()->Tags.IsEmpty() == true)
+				return;
+
+			if (hit_result.GetActor()->ActorHasTag(FName("Enemy")) == false)
+				return;
+
+			cast_game_mode->GetCurrentHUD()->UpdateAimFocus(true);
+			return;
+		}
+	}
+}
+
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -88,6 +128,14 @@ void APlayerCharacter::BeginPlay()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 			Subsystem->AddMappingContext(player_input_mapping_context, 0);
 	}
+
+	FOutputDeviceNull ODN;
+	this->CallFunctionByNameWithArguments(*FString::Printf(TEXT("BPISetOverlayStateEvent %d"), 1), ODN, nullptr, true);
+
+
+	auto game_mode = UGameplayStatics::GetGameMode(GetWorld());
+	if (game_mode != nullptr)
+		cast_game_mode = Cast<AWJGameMode>(game_mode);
 }
 
 void APlayerCharacter::Attack() noexcept
@@ -95,19 +143,15 @@ void APlayerCharacter::Attack() noexcept
 	Super::Attack();
 }
 
-void APlayerCharacter::Move(const FInputActionValue& Value)
+void APlayerCharacter::Move(float _speed) noexcept
 {
-	const FVector2D MovementVector = Value.Get<FVector2D>();
+	current_movement_delta = _speed;
 
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation = FRotator(0.0f,0.0f/* Rotation.Yaw*/
-		, 0.0f);
+	FVector2D Input(0.f, 600.f);
+	FVector2D Output(0.f, current_movement_delta);
+	corss_hair_velocity_factor = FMath::GetMappedRangeValueClamped(Input, Output, 150.f);
 
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(ForwardDirection, MovementVector.Y);
-
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(RightDirection, MovementVector.X);
+	cross_hair_spread_multiplier = 0.5f + corss_hair_velocity_factor; // 0.5~1.5
 }
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
@@ -116,10 +160,19 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 	AddControllerPitchInput(LookAxisVector.Y);
 	AddControllerYawInput(LookAxisVector.X);
+
+
 }
 
 void APlayerCharacter::Equip(const FInputActionValue& Value)
 {
+}
+
+void APlayerCharacter::Flash(const FInputActionValue& Value)
+{
+
+	if(equip_weapon != nullptr)
+		equip_weapon->SetFlash();
 }
 
 void APlayerCharacter::PlayAttackMontage()

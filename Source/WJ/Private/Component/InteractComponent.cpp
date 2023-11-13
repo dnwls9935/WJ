@@ -3,6 +3,7 @@
 
 #include "Component/InteractComponent.h"
 #include "Interact/InteractActor.h"
+#include "Player/PlayerCharacter.h"
 
 // Sets default values for this component's properties
 UInteractComponent::UInteractComponent()
@@ -14,6 +15,9 @@ UInteractComponent::UInteractComponent()
 void UInteractComponent::PlayInteract(AActor* _interacting_actor) noexcept
 {
 	if (interactive_actors.IsEmpty() == true)
+		return;
+
+	if (Cast<APlayerCharacter>(_interacting_actor) == nullptr)
 		return;
 
 	if (GetIsPlayInteract() == true)
