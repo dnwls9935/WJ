@@ -77,10 +77,14 @@ public:
 	FORCEINLINE class APlayerCharacter* GetOwnerPlayer() const noexcept { return owner_player_actor; }
 	FORCEINLINE void SetOwnerPlayer(class APlayerCharacter* _player) noexcept { owner_player_actor = _player; }
 
+	FORCEINLINE const bool CanAddMagazine() noexcept;
+
 
 	void UpdateWeaponInfoToHUD();
 
 	void SetFlash() noexcept;
+
+	const bool AddMagazine() noexcept;
 
 protected:
 	// Called when the game starts or when spawned
@@ -102,7 +106,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Info", meta = (AllowPrivateAccess = "true"))
 	class USceneComponent* muzzle_point;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Info", meta = (AllowPrivateAccess = "true"))
 	class UPointLightComponent* fire_light;
 

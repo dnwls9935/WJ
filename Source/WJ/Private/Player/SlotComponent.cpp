@@ -27,9 +27,9 @@ void USlotComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Add(WEAPON_TYPE::PISTOL);
-	Add(WEAPON_TYPE::PISTOL);
 	Add(WEAPON_TYPE::RIFLE);
+	Add(WEAPON_TYPE::PISTOL);
+	Add(WEAPON_TYPE::PISTOL);
 }
 
 

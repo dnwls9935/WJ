@@ -6,6 +6,7 @@
 
 // Sets default values
 AInteractActor::AInteractActor()
+	: actor_type(ACTOR_TYPE::INTERACT)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,6 +22,10 @@ const bool AInteractActor::Interact(AActor* _interacting_actor) noexcept
 	SetInteractingActor(_interacting_actor);
 
 	return true;
+}
+
+void AInteractActor::FocusOn(const bool b) noexcept
+{
 }
 
 // Called when the game starts or when spawned

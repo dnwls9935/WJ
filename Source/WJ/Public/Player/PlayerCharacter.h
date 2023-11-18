@@ -48,8 +48,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Move(float _speed) noexcept;
 
-
 	void Tick(float _delta_time) override;
+
+	FORCEINLINE const class AActor* GetFocusActor() const noexcept { return focus_actor; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -60,7 +62,7 @@ private:
 	void Look(const FInputActionValue& Value);
 	void Equip(const FInputActionValue& Value);
 	void Flash(const FInputActionValue& Value);
-	void PlayAttackMontage();
+	void Interact(const FInputActionValue& Value);
 
 	void Die() noexcept override;
 	void Hit(const float _damage_amount) noexcept override;
@@ -81,25 +83,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
 	class UInputMappingContext* player_input_mapping_context;
 
-//#pragma region ¾È¾¸
-	/* ============ ¾È¾¸ ============ */
-	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
-	class UInputAction* movement_action;
-
-	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
-	class UInputAction* look_action;
-
-	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
-	class UInputAction* jump_action;
-
-	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
-	class UInputAction* attack_action;
-
-	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
-	class UInputAction* equip_action;
-	/* ============ ¾È¾¸ ============ */
-//#pragma endregion ¾È¾¸
-
 	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
 	class UInputAction* select_slot_action;
 
@@ -111,6 +94,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
 	class UInputAction* flash_action;
+
+	UPROPERTY(EditAnywhere, Category = "Input", Meta = (AllowPrivateAccess = true))
+	class UInputAction* interact_action;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montage", Meta = (AllowPrivateAccess = true))
 	class UAnimMontage* attack_montage;
@@ -139,7 +125,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	bool				is_zoomm;
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status", Meta = (AllowPrivateAccess = "true"))
 	float current_movement_delta;
 
@@ -149,11 +134,15 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status", Meta = (AllowPrivateAccess = "true"))
 	float corss_hair_velocity_factor;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class AActor* camera_actor;
 
-
-
 	class AWJGameMode* cast_game_mode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
+	float interact_distance;
+
+
+	class AActor* focus_actor;
+
 };

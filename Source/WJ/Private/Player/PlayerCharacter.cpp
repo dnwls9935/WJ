@@ -16,18 +16,15 @@
 #include "Player/SlotComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameMode/WJGameMode.h"
+#include "Interact/InteractActor.h"
+#include "Interact/AmmoBox/AmmoBox.h"
 
 APlayerCharacter::APlayerCharacter()
 	: spring_arm(nullptr)
 	, camera(nullptr)
 	, player_input_mapping_context(nullptr)
-	, movement_action(nullptr)
-	, look_action(nullptr)
-	, jump_action(nullptr)
 	, reload_action(nullptr)
-	, attack_action(nullptr)
 	, attack_montage(nullptr)
-	, equip_action(nullptr)
 	, select_slot_action(nullptr)
 	, inventory_action(nullptr)
 	, equip_weapon(nullptr)
@@ -35,6 +32,7 @@ APlayerCharacter::APlayerCharacter()
 	, current_movement_delta(0)
 	, cross_hair_spread_multiplier(0)
 	, corss_hair_velocity_factor(0)
+	, interact_distance(650)
 {
 	slots_component = CreateDefaultSubobject<USlotComponent>(TEXT("Slots"));
 	actor_type = ACTOR_TYPE::PLAYER;
@@ -54,6 +52,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(inventory_action, ETriggerEvent::Started, this, &APlayerCharacter::InventoryInputEvent);
 		EnhancedInputComponent->BindAction(reload_action, ETriggerEvent::Started, this, &APlayerCharacter::Reload);
 		EnhancedInputComponent->BindAction(flash_action, ETriggerEvent::Started, this, &APlayerCharacter::Flash);
+		EnhancedInputComponent->BindAction(interact_action, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
 	}
 }
 
@@ -96,6 +95,7 @@ void APlayerCharacter::Tick(float _delta_time)
 	Super::Tick(_delta_time);
 
 	cast_game_mode->GetCurrentHUD()->UpdateAimFocus(false);
+	focus_actor = nullptr;
 
 	if (is_zoomm == true && camera_actor != nullptr)
 	{
@@ -109,10 +109,17 @@ void APlayerCharacter::Tick(float _delta_time)
 			if (hit_result.GetActor()->Tags.IsEmpty() == true)
 				return;
 
-			if (hit_result.GetActor()->ActorHasTag(FName("Enemy")) == false)
+			if (hit_result.GetActor()->ActorHasTag(FName("Enemy")) == true)
+			{
+				cast_game_mode->GetCurrentHUD()->UpdateAimFocus(true);
 				return;
-
-			cast_game_mode->GetCurrentHUD()->UpdateAimFocus(true);
+			}
+			if (hit_result.GetActor()->ActorHasTag(FName("AmmoBox")) == true && hit_result.Distance <= interact_distance)
+			{
+				focus_actor = hit_result.GetActor();
+				return;
+			}
+			
 			return;
 		}
 	}
@@ -160,8 +167,6 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 	AddControllerPitchInput(LookAxisVector.Y);
 	AddControllerYawInput(LookAxisVector.X);
-
-
 }
 
 void APlayerCharacter::Equip(const FInputActionValue& Value)
@@ -175,8 +180,48 @@ void APlayerCharacter::Flash(const FInputActionValue& Value)
 		equip_weapon->SetFlash();
 }
 
-void APlayerCharacter::PlayAttackMontage()
+void APlayerCharacter::Interact(const FInputActionValue& Value)
 {
+	
+	auto camera_manager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	FVector start = camera_manager->GetCameraLocation();
+	FVector end = camera_manager->GetActorForwardVector();
+
+	end *= interact_distance;
+
+	FHitResult hit_result;
+	bool b = GetWorld()->LineTraceSingleByChannel(hit_result, start, start + end, ECollisionChannel::ECC_Visibility);
+
+	if (b == true)
+	{
+		auto cast_actor = Cast<AInteractActor>(hit_result.GetActor());
+		if (cast_actor == nullptr)
+			return;
+
+		auto type = cast_actor->GetInteractType();
+		switch (type)
+		{
+		case INTERACT_TYPE::AMMO_BOX:
+		{
+			const auto result = cast_actor->Interact(this);
+			if (result == true)
+			{
+				if (equip_weapon->CanAddMagazine() == true)
+				{
+					equip_weapon->AddMagazine();
+					hit_result.GetActor()->Destroy();
+				}
+			}
+		}
+			break;
+		case INTERACT_TYPE::BUTTON:
+			break;
+		case INTERACT_TYPE::NONE:
+		default:
+			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Interact Type is null!!!"));
+			break;
+		}
+	}
 }
 
 void APlayerCharacter::Die() noexcept

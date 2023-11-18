@@ -102,11 +102,24 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 {
 	float damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+
 	const float damaged_value = current_health - damage;
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* point_damage_event = static_cast<const FPointDamageEvent*>(&DamageEvent);
+
+
+		if (hit_effect != nullptr)
+		{
+			auto vector = (point_damage_event->HitInfo.ImpactNormal * 20) + point_damage_event->HitInfo.ImpactPoint;
+
+
+			FTransform transform;
+			transform.TransformPosition(point_damage_event->HitInfo.ImpactPoint);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hit_effect, vector);
+		}
+
 
 		if (damaged_value <= 0)
 			Die();

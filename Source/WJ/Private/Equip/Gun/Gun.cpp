@@ -60,7 +60,6 @@ void AGun::SetAttach(const bool _b) noexcept
 
 bool AGun::Fire() noexcept
 {
-	GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Blue, *FString::Printf(TEXT("%d / %d"), current_ammo, max_ammo));
 	if (can_fire == false || current_ammo <= 0)
 		return false;
 
@@ -77,6 +76,11 @@ bool AGun::Fire() noexcept
 	return true;
 }
 
+const bool AGun::CanAddMagazine() noexcept
+{
+	return current_magazine < max_magazine;
+}
+
 void AGun::UpdateWeaponInfoToHUD()
 {
 	cast_game_mode->UpdateCurrentWidgetInfo(this);
@@ -86,6 +90,19 @@ void AGun::SetFlash() noexcept
 {
 	const bool b = flash->GetVisibleFlag();
 	flash->SetVisibility(!b);
+}
+
+const bool AGun::AddMagazine() noexcept
+{
+	int ammo = current_magazine + max_ammo;
+	if (ammo > max_magazine)
+		current_magazine = max_magazine;
+	else
+		current_magazine = current_magazine + max_ammo;
+
+	UpdateWeaponInfoToHUD();
+
+	return true;
 }
 
 void AGun::BeginReload() noexcept
@@ -129,6 +146,7 @@ void AGun::BeginPlay()
 	Super::BeginPlay();
 	
 	current_ammo = max_ammo;
+	max_magazine = max_ammo * 3;
 
 	auto game_mode = UGameplayStatics::GetGameMode(GetWorld());
 	if (game_mode != nullptr)

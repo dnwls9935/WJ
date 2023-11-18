@@ -42,5 +42,14 @@ enum class ACTOR_TYPE : uint8
 {
 	PLAYER			UMETA(DisplayName = "Player"),
 	ENEMY			UMETA(DisplayName = "Enemy"),
+	INTERACT		UMETA(DisplayName = "Interact"),
+	NONE			UMETA(DisplayName = "None"),
+};
+
+UENUM(BlueprintType)
+enum class INTERACT_TYPE : uint8
+{
+	AMMO_BOX		UMETA(DisplayName = "Ammo Box"),
+	BUTTON			UMETA(DisplayName = "Button"),
 	NONE			UMETA(DisplayName = "None"),
 };

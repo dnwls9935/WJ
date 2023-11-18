@@ -97,6 +97,10 @@ private:
 	TArray<AActor*>		hits;
 
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit", meta = (AllowPrivateAccess = "true"))
+	class UParticleSystem* hit_effect;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage", Meta = (AllowPrivateAccess = true))
 	class UAnimMontage* intro_montage;
 

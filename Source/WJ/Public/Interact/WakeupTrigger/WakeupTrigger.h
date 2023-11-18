@@ -25,7 +25,6 @@ protected:
 
 private:
 	void WakeUp() noexcept;
-	void WakeEvent() noexcept;
 	
 
 private:
