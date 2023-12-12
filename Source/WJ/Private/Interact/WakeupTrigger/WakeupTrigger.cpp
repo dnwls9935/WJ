@@ -43,6 +43,8 @@ void AWakeupTrigger::BeginPlay()
 		for (auto const& iter : overlap_results)
 		{
 			auto actor = iter.GetActor();
+			if (actor == nullptr)
+				continue;
 
 			if (actor->Tags.IsEmpty() == true)
 				continue;

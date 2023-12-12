@@ -16,25 +16,52 @@ class WJ_API AWJGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
+	AWJGameMode();
+	
+public:
 	UFUNCTION(BlueprintCallable, Category="HUD")
 	void ChangeHUD(TSubclassOf<UUserWidget> _widget_class) noexcept;
 
-public:
+	UFUNCTION(BlueprintCallable)
+	void ChangeLevel(FName _level_name) noexcept;
+
 	template<typename T>
 	void UpdateCurrentWidgetInfo(T _t) noexcept;
 
+	FORCEINLINE class UInGameHUD* GetCurrentHUD() { return Cast<UInGameHUD>(current_widget); }
 
-	FORCEINLINE class UInGameHUD* GetCurrentHUD() { return Cast<UInGameHUD>(current_widget); };
+	void AddDefenseActor(class AActor* _actor) noexcept;
+	void DeleteDefenseActor(class AActor* _actor) noexcept;
+
+	FORCEINLINE const bool GetIsDefenseActorAlive() const noexcept { return defense_actor.IsEmpty(); }
+	FORCEINLINE const auto GetDefenActorSize() const noexcept { return defense_actor.Num(); }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE bool GetGameEnd() const noexcept { return level_on; }
+
 
 private:
 	void BeginPlay() override;
+	void Tick(float _deltaTime) override;
+
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UUserWidget> start_widget_class;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> finish_widget_class;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HUD", meta=(AllowPrivateAccess="true"))
 	class UUserWidget* current_widget;
+
+	TArray<class AActor*> defense_actor;
+
+	bool level_on;
+
+	FTimerHandle end_timer;
+
+	bool ending;
 };
 
 template<typename T>

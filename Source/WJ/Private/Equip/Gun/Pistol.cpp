@@ -10,7 +10,7 @@ APistol::APistol()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	info.base_damage = 10.0f;
+	info.base_damage = 50.0f;
 	info.status = WEAPON_STATUS::ONE_HAND_PISTOL;
 }
 

@@ -34,6 +34,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "slot")
 	void Add(const WEAPON_TYPE _type) noexcept;
 
+	UFUNCTION(BlueprintCallable, Category = "slot")
+	FORCEINLINE int32 GetSize() const noexcept { return slots.Num(); }
+
 protected:
 	virtual void BeginPlay() override;
 

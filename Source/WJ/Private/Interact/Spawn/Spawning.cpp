@@ -12,6 +12,7 @@ ASpawning::ASpawning()
     , spawn_count(50)
     , current_count(0)
 {
+    interact_type = INTERACT_TYPE::NONE;
 }
 
 const bool ASpawning::Interact(AActor* _intereacting_actor) noexcept
@@ -40,6 +41,8 @@ void ASpawning::Spawning() noexcept
     else
     {
         auto actor = spawning_actors_list[current_count];
+        if (actor == nullptr)
+            return;
 
         actor->PrimaryActorTick.bCanEverTick = true;
         actor->SetActorHiddenInGame(false);
@@ -78,6 +81,8 @@ void ASpawning::BeginPlay()
         rand.Z = FMath::RandRange(-range.Z, range.Z);
 
         auto actor = GetWorld()->SpawnActor<AActor>(blockBP, GetActorLocation() + rand, GetActorRotation());
+        if (actor == nullptr)
+            break;
         Cast<APawn>(actor)->SpawnDefaultController();
 
         actor->PrimaryActorTick.bCanEverTick = false;

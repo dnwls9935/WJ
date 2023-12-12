@@ -26,13 +26,19 @@ void UInGameHUD::UpdateAmmoAndMagazine(AGun* _gun) noexcept
 {
 	if (_gun == nullptr)
 	{
-		current_ammo_info->SetText(FText::FromString(FString::Printf(TEXT("-"))));
-		current_magazine_info->SetText(FText::FromString(FString::Printf(TEXT("-"))));
+		if (current_ammo_info != nullptr)
+			current_ammo_info->SetText(FText::FromString(FString::Printf(TEXT("-"))));
+
+		if (current_magazine_info != nullptr)
+			current_magazine_info->SetText(FText::FromString(FString::Printf(TEXT("-"))));
 	}
 	else
 	{
-		current_ammo_info->SetText(FText::FromString(FString::Printf(TEXT("%d"), _gun->GetCurrentAmmo())));
-		current_magazine_info->SetText(FText::FromString(FString::Printf(TEXT("%d"), _gun->GetCurrentMagazine())));
+		if(current_ammo_info != nullptr)
+			current_ammo_info->SetText(FText::FromString(FString::Printf(TEXT("%d"), _gun->GetCurrentAmmo())));
+
+		if(current_magazine_info != nullptr)
+			current_magazine_info->SetText(FText::FromString(FString::Printf(TEXT("%d"), _gun->GetCurrentMagazine())));
 	}
 }
 
@@ -56,4 +62,12 @@ void UInGameHUD::UpdateAimFocus(const bool _b) noexcept
 
 	circle_info->Brush.OutlineSettings.Color = color;
 	dot_info->Brush.OutlineSettings.Color = color;
+}
+
+bool UInGameHUD::Initialize()
+{
+	Super::Initialize();
+	UpdateAmmoAndMagazine(nullptr);
+
+	return true;
 }

@@ -16,4 +16,7 @@ class WJ_API UItemDecription : public UUserWidget
 	
 public:
 	void SetFocus(const bool _result) noexcept;
+
+public:
+	void SetDescriptionTitle(const FString& _title) noexcept;
 };

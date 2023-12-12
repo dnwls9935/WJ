@@ -18,6 +18,9 @@
 #include "GameMode/WJGameMode.h"
 #include "Interact/InteractActor.h"
 #include "Interact/AmmoBox/AmmoBox.h"
+#include "GameMode/WJGameMode.h"
+#include "Enemy/Enemy.h"
+#include "Interact/Turret/Turret.h"
 
 APlayerCharacter::APlayerCharacter()
 	: spring_arm(nullptr)
@@ -33,9 +36,15 @@ APlayerCharacter::APlayerCharacter()
 	, cross_hair_spread_multiplier(0)
 	, corss_hair_velocity_factor(0)
 	, interact_distance(650)
+	, is_interacted(false)
+	, attach_turret(nullptr)
 {
 	slots_component = CreateDefaultSubobject<USlotComponent>(TEXT("Slots"));
 	actor_type = ACTOR_TYPE::PLAYER;
+
+
+	interact_point = CreateDefaultSubobject<USceneComponent>(TEXT("Interact Point"));
+	interact_point->SetupAttachment(GetRootComponent());
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -87,17 +96,19 @@ void APlayerCharacter::EquipStateIsNone() noexcept
 {
 	auto game_mode = UGameplayStatics::GetGameMode(GetWorld());
 	if (game_mode != nullptr)
-		cast_game_mode->UpdateCurrentWidgetInfo(nullptr);
+	{
+		if(cast_game_mode != nullptr) cast_game_mode->UpdateCurrentWidgetInfo(nullptr);
+	}
 }
 
 void APlayerCharacter::Tick(float _delta_time)
 {
 	Super::Tick(_delta_time);
 
-	cast_game_mode->GetCurrentHUD()->UpdateAimFocus(false);
+	if(cast_game_mode->GetCurrentHUD() != nullptr) cast_game_mode->GetCurrentHUD()->UpdateAimFocus(false);
 	focus_actor = nullptr;
 
-	if (is_zoomm == true && camera_actor != nullptr)
+	if (/*is_zoomm == true && */camera_actor != nullptr)
 	{
 		FHitResult hit_result;
 
@@ -106,16 +117,26 @@ void APlayerCharacter::Tick(float _delta_time)
 
 		if (GetWorld()->LineTraceSingleByChannel(hit_result, start, end, ECollisionChannel::ECC_Pawn))
 		{
+			if (hit_result.GetActor() == nullptr)
+				return;
+
 			if (hit_result.GetActor()->Tags.IsEmpty() == true)
 				return;
 
 			if (hit_result.GetActor()->ActorHasTag(FName("Enemy")) == true)
 			{
-				cast_game_mode->GetCurrentHUD()->UpdateAimFocus(true);
+				auto hud = cast_game_mode->GetCurrentHUD();
+				if(hud != nullptr)
+					hud->UpdateAimFocus(true);
+
 				return;
 			}
-			if (hit_result.GetActor()->ActorHasTag(FName("AmmoBox")) == true && hit_result.Distance <= interact_distance)
+			if (( hit_result.GetActor()->ActorHasTag(FName("AmmoBox")) == true 
+				|| hit_result.GetActor()->ActorHasTag(FName("EquipGun")) == true
+				|| hit_result.GetActor()->ActorHasTag(FName("Button")) == true )
+				&& hit_result.Distance <= interact_distance)
 			{
+
 				focus_actor = hit_result.GetActor();
 				return;
 			}
@@ -123,6 +144,15 @@ void APlayerCharacter::Tick(float _delta_time)
 			return;
 		}
 	}
+}
+
+void APlayerCharacter::AddSlot(WEAPON_TYPE _type) noexcept
+{
+	slots_component->Add(_type);
+
+
+	if (slots_component->GetSize() == 1)
+		SelectSlot(1);
 }
 
 void APlayerCharacter::BeginPlay()
@@ -142,7 +172,10 @@ void APlayerCharacter::BeginPlay()
 
 	auto game_mode = UGameplayStatics::GetGameMode(GetWorld());
 	if (game_mode != nullptr)
+	{
 		cast_game_mode = Cast<AWJGameMode>(game_mode);
+		cast_game_mode->UpdateCurrentWidgetInfo(nullptr);
+	}
 }
 
 void APlayerCharacter::Attack() noexcept
@@ -182,12 +215,18 @@ void APlayerCharacter::Flash(const FInputActionValue& Value)
 
 void APlayerCharacter::Interact(const FInputActionValue& Value)
 {
-	
 	auto camera_manager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 	FVector start = camera_manager->GetCameraLocation();
 	FVector end = camera_manager->GetActorForwardVector();
 
 	end *= interact_distance;
+
+	if (is_interacted == true)
+	{
+		is_interacted = attach_turret->AttachActor(false, this);
+		return;
+	}
+
 
 	FHitResult hit_result;
 	bool b = GetWorld()->LineTraceSingleByChannel(hit_result, start, start + end, ECollisionChannel::ECC_Visibility);
@@ -206,7 +245,7 @@ void APlayerCharacter::Interact(const FInputActionValue& Value)
 			const auto result = cast_actor->Interact(this);
 			if (result == true)
 			{
-				if (equip_weapon->CanAddMagazine() == true)
+				if (equip_weapon != nullptr && equip_weapon->CanAddMagazine() == true)
 				{
 					equip_weapon->AddMagazine();
 					hit_result.GetActor()->Destroy();
@@ -214,7 +253,26 @@ void APlayerCharacter::Interact(const FInputActionValue& Value)
 			}
 		}
 			break;
+		case INTERACT_TYPE::EQUIP_WEAPON:
+		{
+			const auto result = cast_actor->Interact(this);
+			if (result == true)
+			{
+				hit_result.GetActor()->Destroy();
+			}
+		}
+			break;
 		case INTERACT_TYPE::BUTTON:
+		{
+			const auto result = cast_actor->Interact(this);
+		}
+			break;
+		case INTERACT_TYPE::TURRET:
+		{
+			const auto result = cast_actor->Interact(this);
+			is_interacted = Cast<ATurret>(cast_actor)->AttachActor(true, this);
+			attach_turret = Cast<ATurret>(cast_actor);
+		}
 			break;
 		case INTERACT_TYPE::NONE:
 		default:
@@ -238,6 +296,9 @@ void APlayerCharacter::Hit(const float _damage_amount) noexcept
 
 void APlayerCharacter::Reload(const FInputActionValue& Value)
 {
+	if (equip_weapon == nullptr)
+		return;
+
 	/* Camera Shake Test */
 	if (equip_weapon->CanReload() == false)
 		return;
@@ -272,20 +333,27 @@ void APlayerCharacter::Reload(const FInputActionValue& Value)
 void APlayerCharacter::SelectSlotInputEvnet(const FInputActionValue& _value) noexcept
 {
 	auto value = _value.Get<FVector>().X;
-	//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, FString::Printf(TEXT("SelectSlotInputEvnet Event!! : %f"), value));
-
-	FOutputDeviceNull ODN;
-	this->CallFunctionByNameWithArguments(*FString::Printf(TEXT("BPISetOverlayStateEvent %d"), static_cast<int>(value)), ODN, nullptr, true);
+	SelectSlot(static_cast<int>(value));
 }
 
 void APlayerCharacter::InventoryInputEvent(const FInputActionValue& value) noexcept
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, TEXT("InventoryInputEvent Event!!"));
+	//cast_game_mode->ChangeLevel(FName("Scene_0"));
+}
+
+void APlayerCharacter::SelectSlot(const int _index) noexcept
+{
+	FOutputDeviceNull ODN;
+	this->CallFunctionByNameWithArguments(*FString::Printf(TEXT("BPISetOverlayStateEvent %d"), _index), ODN, nullptr, true);
 }
 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	auto sum = current_health - DamageAmount;
+
+	if (Cast<AEnemy>(DamageCauser) == nullptr)
+		return current_health;
 
 	if (sum <= 0)
 		Die();

@@ -26,6 +26,7 @@ public:
 	virtual void PostInitializeComponents() override;
 
 	FORCEINLINE const bool GetDead() const noexcept { return is_dead; }
+	FORCEINLINE const float GetHeath() const noexcept { return current_health; }
 
 	FORCEINLINE const ACTOR_TYPE GetActorType() const noexcept { return actor_type; }
 

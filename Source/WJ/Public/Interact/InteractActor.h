@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Function/WJDefines.h"
+#include "GameMode/WJGameMode.h"
 #include "InteractActor.generated.h"
 
 UCLASS()
@@ -48,6 +49,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Option", meta = (AllowPrivateAccess = "true"))
 	ACTOR_TYPE actor_type;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Option", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Option", meta = (AllowPrivateAccess = "true"))
 	INTERACT_TYPE interact_type;
+
+	class AWJGameMode* in_game_mode;
 };

@@ -52,6 +52,10 @@ public:
 
 	FORCEINLINE const class AActor* GetFocusActor() const noexcept { return focus_actor; }
 
+	void AddSlot(WEAPON_TYPE _type) noexcept;
+
+	FORCEINLINE class USceneComponent* GetInteractPoint() const noexcept { return interact_point; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -68,10 +72,11 @@ private:
 	void Hit(const float _damage_amount) noexcept override;
 
 	void Reload(const FInputActionValue& Value);
-
-private:
+	
 	void SelectSlotInputEvnet(const FInputActionValue& _value) noexcept;
 	void InventoryInputEvent(const FInputActionValue& _value) noexcept;
+
+	void SelectSlot(const int _index) noexcept;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", Meta = (AllowPrivateAccess = true))
@@ -142,7 +147,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input", Meta = (AllowPrivateAccess = "true"))
 	float interact_distance;
 
-
 	class AActor* focus_actor;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Status", meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* interact_point;
+
+	bool is_interacted;
+	class ATurret* attach_turret;
 };

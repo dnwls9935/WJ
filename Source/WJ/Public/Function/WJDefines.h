@@ -34,6 +34,7 @@ enum class ENEMY_SPAWN_TYPE : uint8
 {
 	NORMAL			UMETA(DisplayName = "Normal"),
 	INTERACT		UMETA(DisplayName = "Interact"),
+	DEFENSE			UMETA(DisplayName = "Defense"),
 	NONE			UMETA(DisplayName = "None"),
 };
 
@@ -50,6 +51,18 @@ UENUM(BlueprintType)
 enum class INTERACT_TYPE : uint8
 {
 	AMMO_BOX		UMETA(DisplayName = "Ammo Box"),
+	EQUIP_WEAPON	UMETA(DisplayName = "Equip Weapon"),
 	BUTTON			UMETA(DisplayName = "Button"),
+	TURRET			UMETA(DisplayName = "TURRET"),
+	NONE			UMETA(DisplayName = "None"),
+};
+
+
+UENUM(BlueprintType)
+enum class TURRET_STATE : uint8
+{
+	IDEL_ROT		UMETA(DisplayName = "Idle Rot"),
+	IDLE_ROT_STOP	UMETA(DisplayName = "Idle Rot Stop"),
+	ATTACK			UMETA(DisplayName = "Attack"),
 	NONE			UMETA(DisplayName = "None"),
 };

@@ -21,6 +21,8 @@ public:
 
 	void UpdateAimFocus(const bool _b) noexcept;
 
+	bool Initialize() override;
+
 private:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class UImage*		aim_top_bar;

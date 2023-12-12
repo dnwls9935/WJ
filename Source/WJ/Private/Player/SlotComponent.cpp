@@ -18,7 +18,7 @@ void USlotComponent::Add(const WEAPON_TYPE _type) noexcept
 {
 	if (_type == WEAPON_TYPE::NONE)
 		return;
-
+	
 	slots.Add(_type);
 }
 
@@ -27,9 +27,9 @@ void USlotComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Add(WEAPON_TYPE::RIFLE);
-	Add(WEAPON_TYPE::PISTOL);
-	Add(WEAPON_TYPE::PISTOL);
+	//Add(WEAPON_TYPE::RIFLE);
+	//Add(WEAPON_TYPE::PISTOL);
+	//Add(WEAPON_TYPE::PISTOL);
 }
 
 

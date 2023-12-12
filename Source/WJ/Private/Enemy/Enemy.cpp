@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/PlayerCharacter.h"
 #include "Equip/Gun/Gun.h"
+#include "GameMode/WJGameMode.h"
 
 
 AEnemy::AEnemy()
@@ -126,6 +127,12 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		else
 		{
 			Hit(damage, point_damage_event->HitInfo.Component->GetName());
+
+			auto cast_causer = Cast<AGun>(DamageCauser);
+
+			if (cast_causer == nullptr)
+				return damage;
+
 			auto owner = Cast<AGun>(DamageCauser)->GetOwnerPlayer();
 
 			SetTarget(owner);
@@ -143,6 +150,10 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	movement_speed = FMath::RandRange(400, 800);
+	GetCharacterMovement()->MaxWalkSpeed = movement_speed;
+
 	BeginPlay(enemy_spawn_type);
 }
 
@@ -205,6 +216,13 @@ const float AEnemy::ShootTarget(const float _damage, const FString _name) noexce
 
 void AEnemy::Destroy()
 {
+	if (enemy_spawn_type == ENEMY_SPAWN_TYPE::DEFENSE)
+	{
+		auto game_mode = UGameplayStatics::GetGameMode(GetWorld());
+		if (game_mode != nullptr)
+			Cast<AWJGameMode>(game_mode)->DeleteDefenseActor(this);
+	}
+
 	Super::Destroy();
 }
 
@@ -241,6 +259,11 @@ void AEnemy::BeginPlay(ENEMY_SPAWN_TYPE _type) noexcept
 	}
 	case ENEMY_SPAWN_TYPE::INTERACT:
 		GetMesh()->GetAnimInstance()->Montage_Play(intro_montage);
+		is_intro = false;
+		break;
+	case ENEMY_SPAWN_TYPE::DEFENSE:
+		GetMesh()->GetAnimInstance()->Montage_Stop(1, intro_montage);
+		//GetMesh()->GetAnimInstance()->Montage_Play(intro_montage);
 		is_intro = false;
 		break;
 	case ENEMY_SPAWN_TYPE::NONE:

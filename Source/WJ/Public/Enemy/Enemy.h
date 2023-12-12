@@ -56,6 +56,7 @@ protected:
 
 private:
 	const float ShootTarget(const float _damage, const FString _name) noexcept;
+
 	void Destroy();
 
 public:

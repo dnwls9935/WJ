@@ -63,6 +63,14 @@ void AAmmoBox::Tick(float _deltaTime)
 void AAmmoBox::FocusOn(const bool b) noexcept
 {
 	Super::FocusOn(b);
-
 	widget->SetVisibility(b);
+
+	if (b == true)
+	{
+		static_mesh->SetScalarParameterValueOnMaterials(TEXT("FresnelMul"), 500);
+	}
+	else
+	{
+		static_mesh->SetScalarParameterValueOnMaterials(TEXT("FresnelMul"), 0);
+	}
 }

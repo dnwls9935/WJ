@@ -5,7 +5,7 @@
 
 ARifle::ARifle()
 {
-	info.base_damage = 15.0f;
+	info.base_damage = 65.0f;
 	info.status = WEAPON_STATUS::RIFLE;
 }
 
