@@ -3,7 +3,7 @@
 [![클릭 시 동영상 재생](http://img.youtube.com/vi/ztiRlsxCO24/0.jpg)](https://youtu.be/ztiRlsxCO24)
 
 #### 기간 : 약 1달
-#### 개발환경 : Visual Studio 2022, c++ 17, git, DirectX 11, x64
+#### 개발환경 : unreal engine 5.1 / visual studio 2022 / c++ / git
 
 #### 주요내용
 - ALS 에셋 커스터마이징
